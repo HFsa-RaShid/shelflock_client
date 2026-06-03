@@ -1,0 +1,109 @@
+{
+  "categories_list": [
+    {
+      "id": "CAT-01",
+      "name": "Makeup",
+      "image_url": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400&q=80",
+      "subcategories_count": 3,
+      "total_products": 48,
+      "status": "Active",
+      "subcategories": [
+        { 
+          "name": "Lipstick & Lip color", 
+          "products": 48,
+          "image_url": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Foundation & Concealer", 
+          "products": 12,
+          "image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Eye Makeup", 
+          "products": 68,
+          "image_url": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80"
+        }
+      ]
+    },
+    {
+      "id": "CAT-02",
+      "name": "Skin Care",
+      "image_url": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=80",
+      "subcategories_count": 4,
+      "total_products": 24,
+      "status": "Active",
+      "subcategories": [
+        { 
+          "name": "Moisturizer", 
+          "products": 14,
+          "image_url": "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Sunscreen", 
+          "products": 10,
+          "image_url": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=80"
+        }
+      ]
+    },
+    {
+      "id": "CAT-03",
+      "name": "Shoes",
+      "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80",
+      "subcategories_count": 3,
+      "total_products": 48,
+      "status": "Inactive",
+      "subcategories": [
+        { 
+          "name": "Sneakers", 
+          "products": 28,
+          "image_url": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Formal Shoes", 
+          "products": 20,
+          "image_url": "https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=300&q=80"
+        }
+      ]
+    },
+    {
+      "id": "CAT-04",
+      "name": "Hair Care",
+      "image_url": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80",
+      "subcategories_count": 2,
+      "total_products": 12,
+      "status": "Active",
+      "subcategories": [
+        { 
+          "name": "Shampoo", 
+          "products": 8,
+          "image_url": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Hair Oil", 
+          "products": 4,
+          "image_url": "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=300&q=80"
+        }
+      ]
+    },
+    {
+      "id": "CAT-05",
+      "name": "Clothing",
+      "image_url": "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=400&q=80",
+      "subcategories_count": 4,
+      "total_products": 42,
+      "status": "Inactive",
+      "subcategories": [
+        { 
+          "name": "T-Shirt", 
+          "products": 22,
+          "image_url": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80"
+        },
+        { 
+          "name": "Blazer", 
+          "products": 20,
+          "image_url": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=300&q=80"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "inventory_stock_management": [
+    {
+      "id": "1",
+      "sku": "#ORD-5533",
+      "product_name": "Polo Shirt",
+      "image_url": "/images/products/polo-shirt.png",
+      "category": "Clothing",
+      "price": 23.50,
+      "current_stock": 0,
+      "max_stock": 10,
+      "color": "red"
+    },
+    {
+      "id": "2",
+      "sku": "#ORD-5533",
+      "product_name": "Classic Sneakers",
+      "image_url": "/images/products/classic-sneakers.png",
+      "category": "Shoes",
+      "price": 24.50,
+      "current_stock": 6,
+      "max_stock": 10,
+      "color": "yellow"
+    },
+    {
+      "id": "3",
+      "sku": "#ORD-5533",
+      "product_name": "Tommy Jacket",
+      "image_url": "/images/products/tommy-jacket.png",
+      "category": "Clothing",
+      "price": 35.23,
+      "current_stock": 9,
+      "max_stock": 20,
+      "color": "yellow"
+    },
+    {
+      "id": "4",
+      "sku": "#ORD-5533",
+      "product_name": "Nike Air2",
+      "image_url": "/images/products/nike-air2.png",
+      "category": "Shoes",
+      "price": 120.50,
+      "current_stock": 48,
+      "max_stock": 100,
+      "color": "green"
+    },
+    {
+      "id": "5",
+      "sku": "#ORD-5533",
+      "product_name": "Plain T-Shirt",
+      "image_url": "/images/products/plain-tshirt.png",
+      "category": "Clothing",
+      "price": 12.80,
+      "current_stock": "Unlimited",
+      "max_stock": null,
+      "color": "blue"
+    },
+    {
+      "id": "6",
+      "sku": "#ORD-5533",
+      "product_name": "Leather Bag",
+      "image_url": "/images/products/leather-bag.png",
+      "category": "Accessories",
+      "price": 30.70,
+      "current_stock": 3,
+      "max_stock": 10,
+      "color": "red"
+    },
+    {
+      "id": "7",
+      "sku": "#ORD-5533",
+      "product_name": "Leather Belt",
+      "image_url": "/images/products/leather-belt.png",
+      "category": "Accessories",
+      "price": 15.60,
+      "current_stock": 7,
+      "max_stock": 10,
+      "color": "yellow"
+    }
+  ]
+}

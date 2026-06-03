@@ -1,0 +1,20 @@
+{
+  "stock_history_log": [
+    {
+      "id": "log_01",
+      "status_type": "restocked",
+      "status_image_url": "/images/icons/green-plus.png",
+      "title": "Hair Oil 200ml restocked (+50 units)",
+      "responsible_party": "Restocked by Rina Islam",
+      "time_stamp": "Today, 10:30 AM"
+    },
+    {
+      "id": "log_02",
+      "status_type": "out_of_stock",
+      "status_image_url": "/images/icons/red-minus.png",
+      "title": "Red Matte Lipstick is out of stock",
+      "responsible_party": "Order #1042 was placed",
+      "time_stamp": "Today, 09:15 AM"
+    }
+  ]
+}
