@@ -1,48 +1,34 @@
 "use client";
 import React, { useState, useEffect } from "react";
-// কান্ট্রি ড্রপডাউনের জন্য প্যাকেজ ও সিএসএস ইম্পোর্ট
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { useStoreContext } from "@/store/useStoreContext"; // আপনার স্টোর কনটেক্সট
+import { useGetAlertRule, useSaveAlertRule } from "@/hooks/useAlertRule";
 
 export default function AlertRules() {
+  const { currentStoreId } = useStoreContext(); // ডাইনামিক স্টোর আইডি
+
   // ১. স্টেট ম্যানেজমেন্ট
   const [selectedIntervals, setSelectedIntervals] = useState<number[]>([30, 7, 3]);
-  
-  // ফোন নম্বর এবং কান্ট্রি কোডের জন্য স্টেট
   const [fullPhoneNumber, setFullPhoneNumber] = useState<string>("8801838551951"); 
-
-  // নোটিফিকেশন চ্যানেল স্টেট
   const [channels, setChannels] = useState<string[]>(["WhatsApp Alert", "Email Dispatch"]);
 
   const availableIntervals = [60, 45, 30, 15, 7, 5, 3, 1];
 
-  // 🔄 ২. ব্যাকএন্ড থেকে আগের সেভ করা ডেটা লোড করা (Pre-fill)
+  // ২. TanStack Query Hooks কল
+  const { data: alertRule, isLoading } = useGetAlertRule(currentStoreId || "");
+  const saveAlertRuleMutation = useSaveAlertRule(currentStoreId || "");
+
+  // 🔄 ৩. এপিআই থেকে ডেটা আসলে স্টেটগুলো সিন্ক (Pre-fill) করা
   useEffect(() => {
-    const fetchAlertSettings = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/alert-rules", {
-          method: "GET",
-          headers: {
-            "store-id": "YOUR_STORE_ID_HERE", // আপনার ডাইনামিক স্টোর আইডি
-          },
-        });
-        const resData = await response.json();
-        
-        if (resData.success && resData.data) {
-          const savedData = resData.data;
-          if (savedData.intervals) setSelectedIntervals(savedData.intervals);
-          if (savedData.whatsappNumber) setFullPhoneNumber(savedData.whatsappNumber);
-          if (savedData.channels) setChannels(savedData.channels);
-        }
-      } catch (error) {
-        console.error("Failed to fetch initial alert rules:", error);
-      }
-    };
+    if (alertRule) {
+      if (alertRule.intervals) setSelectedIntervals(alertRule.intervals);
+      if (alertRule.whatsappNumber) setFullPhoneNumber(alertRule.whatsappNumber);
+      if (alertRule.channels) setChannels(alertRule.channels);
+    }
+  }, [alertRule]);
 
-    fetchAlertSettings();
-  }, []);
-
-  // ৩. ইন্টারভাল সিলেক্ট/ডিসিলেক্ট করার লজিক
+  // ৪. ইন্টারভাল সিলেক্ট/ডিসিলেক্ট লজিক
   const toggleInterval = (day: number) => {
     if (selectedIntervals.includes(day)) {
       setSelectedIntervals(selectedIntervals.filter((d) => d !== day));
@@ -51,7 +37,7 @@ export default function AlertRules() {
     }
   };
 
-  // ৪. চ্যানেল সিলেক্ট/ডিসিলেক্ট লজিক
+  // ৫. চ্যানেল সিলেক্ট/ডিসিলেক্ট লজিক
   const toggleChannel = (channel: string) => {
     if (channels.includes(channel)) {
       setChannels(channels.filter((c) => c !== channel));
@@ -60,8 +46,12 @@ export default function AlertRules() {
     }
   };
 
-  // 🚀 ৫. নতুন ডেটা ব্যাকএন্ডে সেভ করা (Create/Update)
-  const handleSaveAlertSettings = async () => {
+  // 🚀 ৬. হুক ব্যবহার করে ডেটা ব্যাকএন্ডে সাবমিট করা
+  const handleSaveAlertSettings = () => {
+    if (!currentStoreId) {
+      alert("Please select a store first.");
+      return;
+    }
     if (!fullPhoneNumber || fullPhoneNumber.length < 10) {
       alert("অনুগ্রহ করে একটি সঠিক ফোন নম্বর দিন।");
       return;
@@ -69,31 +59,24 @@ export default function AlertRules() {
 
     const payload = {
       intervals: selectedIntervals,
-      customMessage: "", // 👈 কাস্টম মেসেজ পার্টটি UI থেকে বাদ দেওয়ায় এখানে খালি স্ট্রিং পাঠানো হচ্ছে, ব্যাকএন্ড তার নিজস্ব ডিফল্ট বাংলা মেসেজ ব্যবহার করবে
-      whatsappNumber: fullPhoneNumber, 
+      customMessage: "", // ব্যাকএন্ড এর ডিফল্ট মেসেজ ব্যবহারের জন্য খালি পাঠানো হচ্ছে
+      whatsappNumber: fullPhoneNumber,
       channels: channels,
     };
 
-    try {
-      const response = await fetch("http://localhost:5000/api/alert-rules", {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json",
-          "store-id": "YOUR_STORE_ID_HERE",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const resData = await response.json();
-      if (resData.success) {
-        alert("Alert System Rules Saved/Updated Successfully!");
-      } else {
-        alert("Error: " + resData.error);
+    saveAlertRuleMutation.mutate(payload, {
+      onSuccess: (res) => {
+        if (res.success) {
+          alert("Alert System Rules Saved Successfully!");
+        } else {
+          alert("Error: " + res.error);
+        }
+      },
+      onError: (error) => {
+        console.error("Failed to save rules:", error);
+        alert("Something went wrong while saving settings.");
       }
-    } catch (error) {
-      console.error("Failed to save rules:", error);
-      alert("Something went wrong while saving settings.");
-    }
+    });
   };
 
   return (
@@ -103,100 +86,117 @@ export default function AlertRules() {
         <p className="text-sm text-gray-500 mt-1">Configure multi-stage automated message rules prior to lock expiration.</p>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
-        
-        {/* 🗺️ কান্ট্রি কোড ড্রপডাউন এবং ফোন নম্বর ইনপুট */}
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-            Merchant WhatsApp Notification Number
-          </label>
-          <div className="max-w-md alert-phone-input">
-            <PhoneInput
-              country={"bd"} 
-              value={fullPhoneNumber}
-              onChange={(phone) => setFullPhoneNumber(phone)} 
-              inputStyle={{
-                width: "100%",
-                height: "46px",
-                borderRadius: "12px",
-                fontSize: "14px",
-                color: "#0E2038",
-                borderColor: "#E5E7EB"
-              }}
-              buttonStyle={{
-                borderTopLeftRadius: "12px",
-                borderBottomLeftRadius: "12px",
-                borderColor: "#E5E7EB",
-                backgroundColor: "#F9FAFB"
-              }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5">
-            Select country and enter the WhatsApp number for system alerts.
-          </p>
+      {/* ⏳ নো-স্টোর হ্যান্ডলিং */}
+      {!currentStoreId && (
+        <div className="p-8 text-center bg-amber-50 text-amber-700 rounded-2xl border border-amber-200">
+          Please select a store from topbar first to view or configure alert rules.
         </div>
+      )}
 
-        {/* Interval Selector */}
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
-            Select Trigger Intervals (Multiple Days Prior to Expiry)
-          </label>
-          <div className="flex flex-wrap gap-3">
-            {availableIntervals.map((day) => {
-              const isActive = selectedIntervals.includes(day);
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleInterval(day)}
-                  className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
-                    isActive
-                      ? "border-[#F74608] bg-[#FFF9F6] text-[#F74608] border-[1.5px]"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300 bg-white"
-                  }`}
-                >
-                  {day} Days Before
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-xs text-gray-400 mt-2">System will push separate alerts at every selected milestone stage.</p>
-        </div>
+      {currentStoreId && (
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6 relative">
+          
+          {/* লোডিং ইন্ডিকেটর ব্লার ইফেক্ট সহ */}
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-xs flex items-center justify-center z-10 rounded-2xl">
+              <span className="text-sm font-semibold text-gray-500 animate-pulse">Loading settings...</span>
+            </div>
+          )}
 
-        {/* 🔘 Channels (শুধুমাত্র হোয়াটসঅ্যাপ এবং ইমেইল অপশন) */}
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-            Notification Channels
-          </label>
-          <div className="flex gap-6 pt-1">
-            {["WhatsApp Alert", "Email Dispatch"].map((channel, idx) => {
-              const isChecked = channels.includes(channel);
-              return (
-                <label key={idx} className="flex items-center gap-2.5 text-sm font-semibold text-[#0E2038] cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => toggleChannel(channel)}
-                    className="h-4 w-4 rounded text-[#F74608] border-gray-300 focus:ring-0 accent-[#F74608]"
-                  />
-                  {channel}
-                </label>
-              );
-            })}
+          {/* 🗺️ কান্ট্রি কোড ড্রপডাউন এবং ফোন নম্বর ইনপুট */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              Merchant WhatsApp Notification Number
+            </label>
+            <div className="max-w-md alert-phone-input">
+              <PhoneInput
+                country={"bd"} 
+                value={fullPhoneNumber}
+                onChange={(phone) => setFullPhoneNumber(phone)} 
+                inputStyle={{
+                  width: "100%",
+                  height: "46px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  color: "#0E2038",
+                  borderColor: "#E5E7EB"
+                }}
+                buttonStyle={{
+                  borderTopLeftRadius: "12px",
+                  borderBottomLeftRadius: "12px",
+                  borderColor: "#E5E7EB",
+                  backgroundColor: "#F9FAFB"
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              Select country and enter the WhatsApp number for system alerts.
+            </p>
+          </div>
+
+          {/* Interval Selector */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+              Select Trigger Intervals (Multiple Days Prior to Expiry)
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {availableIntervals.map((day) => {
+                const isActive = selectedIntervals.includes(day);
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleInterval(day)}
+                    className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                      isActive
+                        ? "border-[#F74608] bg-[#FFF9F6] text-[#F74608] border-[1.5px]"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300 bg-white"
+                    }`}
+                  >
+                    {day} Days Before
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-400 mt-2">System will push separate alerts at every selected milestone stage.</p>
+          </div>
+
+          {/* 🔘 Channels (হোয়াটসঅ্যাপ এবং ইমেইল অপশন) */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              Notification Channels
+            </label>
+            <div className="flex gap-6 pt-1">
+              {["WhatsApp Alert", "Email Dispatch"].map((channel, idx) => {
+                const isChecked = channels.includes(channel);
+                return (
+                  <label key={idx} className="flex items-center gap-2.5 text-sm font-semibold text-[#0E2038] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleChannel(channel)}
+                      className="h-4 w-4 rounded text-[#F74608] border-gray-300 focus:ring-0 accent-[#F74608]"
+                    />
+                    {channel}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Actions Button */}
+          <div className="pt-2">
+            <button 
+              type="button" 
+              onClick={handleSaveAlertSettings}
+              disabled={saveAlertRuleMutation.isPending}
+              className="rounded-xl bg-[#F74608] px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition disabled:bg-orange-400"
+            >
+              {saveAlertRuleMutation.isPending ? "Saving Settings..." : "Save Alert System Rules"}
+            </button>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="pt-2  border-gray-50">
-          <button 
-            type="button" 
-            onClick={handleSaveAlertSettings}
-            className="rounded-xl bg-[#F74608] px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition"
-          >
-            Save Alert System Rules
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

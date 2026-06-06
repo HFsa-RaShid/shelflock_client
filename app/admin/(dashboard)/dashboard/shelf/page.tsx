@@ -2,22 +2,24 @@
 "use client";
 import React, { useState } from "react";
 import { Plus, Filter } from "lucide-react";
-import { useStoreContext } from "@/store/useStoreContext"; // আপনার টপবারে ব্যবহৃত স্টোর কন্টেক্সট
+import { useStoreContext } from "@/store/useStoreContext";
 import { useGetProducts, useCreateProduct, useUpdateProduct } from "@/hooks/useProduct";
+import { useGetCategories } from "@/hooks/useCategory"; // ক্যাটাগরি হুক ইমপোর্ট করা হলো
 import AddProductModal from "./AddProductModal";
 
-
 export default function ShelfStorage() {
-  const { currentStoreId } = useStoreContext(); // গ্লোবাল কারেন্ট স্টোর আইডি আনা হলো
+  const { currentStoreId } = useStoreContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("All");
 
-  // রিয়্যাক্ট কোয়েরি হুক এপিআই কল
-  const { data: products = [], isLoading } = useGetProducts(currentStoreId);
+  // রিয়্যাক্ট কোয়েরি হুক এপিআই কল
+  const { data: products = [], isLoading: isProductsLoading } = useGetProducts(currentStoreId);
+  const { data: categories = [], isLoading: isCategoriesLoading } = useGetCategories(currentStoreId || "");
+  
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
 
-  // মোডাল থেকে ডাটা নিয়ে এপিআই-তে পোস্ট করা
+  // মোডাল থেকে ডাটা নিয়ে এপিআই-তে পোস্ট করা
   const handleAddProductSubmit = (formData: any) => {
     if (!currentStoreId) return;
     createProductMutation.mutate(
@@ -30,10 +32,8 @@ export default function ShelfStorage() {
     );
   };
 
-  // টেবিলে লাইভ স্ট্যাটাস (বা কোয়ান্টিটি/টার্মস) সুইচ বা পরিবর্তন করার মেথড
+  // টেবিলে লাইভ স্ট্যাটাস সুইচ বা পরিবর্তন করার মেথড
   const handleToggleStatus = (id: string, currentQuantity: number) => {
-    // উদাহরণস্বরূপ: আনলকড থাকলে কোয়ান্টিটি ০ করে দেওয়া বা কাস্টম স্ট্যাটাস লজিক হ্যান্ডেল করা
-    // যেহেতু আপনার ব্যাকএন্ডে IProductUpdateInput এ কোয়ান্টিটি বা অন্যান্য ফিল্ড আছে:
     const targetQuantity = currentQuantity > 0 ? 0 : 5; // সিম্পল টগল এক্সাম্পল
     updateProductMutation.mutate({
       id,
@@ -41,12 +41,10 @@ export default function ShelfStorage() {
     });
   };
 
-  // ক্লায়েন্ট সাইড ক্যাটাগরি ফিল্টারিং লজিক
+  // ডাইনামিক ক্যাটাগরি ফিল্টারিং লজিক (ID দিয়ে ম্যাচ করা হচ্ছে)
   const filteredProducts = products.filter((p: any) => {
-    if (selectedCategory === "All") return true;
-    // আপনার ডাটাবেজে যদি রিলেশন অবজেক্ট থাকে (p.category.name) অথবা ডিরেক্ট আইডি (p.categoryId) থাকে তা চেক করবে
-    const productCat = p.category?.name || p.categoryId;
-    return productCat?.toLowerCase() === selectedCategory.toLowerCase();
+    if (selectedCategoryId === "All") return true;
+    return p.categoryId === selectedCategoryId;
   });
 
   return (
@@ -58,17 +56,17 @@ export default function ShelfStorage() {
           <h1 className="text-2xl font-bold text-[#0E2038]">Shelf Storage (Store Room)</h1>
           <p className="text-sm text-gray-500 mt-1">Lock new products with expiry terms into your dedicated categories.</p>
         </div>
-        {/* ➕ অ্যাড প্রোডাক্ট বাটন যা মোডাল ট্রিগার করবে */}
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#F74608] px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition self-start sm:self-auto shadow-sm"
+          disabled={!currentStoreId}
+          className="flex items-center justify-center gap-2 rounded-xl bg-[#F74608] px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition self-start sm:self-auto shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           <Plus className="w-4 h-4" />
           Add Product
         </button>
       </div>
 
-      {/* ⏳ লোডিং এবং নো-স্টোর হ্যান্ডলিং */}
+      {/* ⏳ নো-স্টোর হ্যান্ডলিং */}
       {!currentStoreId && (
         <div className="p-8 text-center bg-amber-50 text-amber-700 rounded-2xl border border-amber-200">
           Please select a store from topbar first to view or manage shelf items.
@@ -77,19 +75,21 @@ export default function ShelfStorage() {
 
       {currentStoreId && (
         <>
-          {/* 🎯 ফিল্টার সেকশন (লিস্টের উপরে ক্যাটাগরি সিলেক্ট করার ড্রপডাউন) */}
+          {/* 🎯 ফিল্টার সেকশন (ডাইনামিক ক্যাটাগরি ড্রপডাউন) */}
           <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-100 shadow-sm max-w-xs">
             <Filter className="w-4 h-4 text-gray-400 shrink-0" />
             <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-transparent text-sm text-[#0E2038] font-medium outline-none cursor-pointer"
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              disabled={isCategoriesLoading}
+              className="w-full bg-transparent text-sm text-[#0E2038] font-medium outline-none cursor-pointer disabled:opacity-50"
             >
               <option value="All">All Categories</option>
-              <option value="Groceries">Groceries</option>
-              <option value="Pharmacy">Pharmacy</option>
-              <option value="Dairy & Bakery">Dairy & Bakery</option>
-              <option value="Cosmetics">Cosmetics</option>
+              {categories.map((cat: any) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -99,10 +99,10 @@ export default function ShelfStorage() {
               <h3 className="text-sm font-bold text-[#0E2038] uppercase tracking-wider">Active Shelf Items</h3>
             </div>
             
-            {isLoading ? (
+            {isProductsLoading ? (
               <div className="p-10 text-center text-sm text-gray-400 animate-pulse">Loading items from shelf...</div>
             ) : filteredProducts.length === 0 ? (
-              <div className="p-10 text-center text-sm text-gray-400">No products found in this category.</div>
+              <div className="p-10 text-center text-sm text-gray-400">No products found.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -117,14 +117,13 @@ export default function ShelfStorage() {
                   </thead>
                   <tbody className="text-sm text-[#0E2038] divide-y divide-gray-50">
                     {filteredProducts.map((p: any) => {
-                      const isLocked = p.quantity > 0; // যদি স্টক থাকে তবে লকড, নয়তো আউট অফ স্টক/আনলকড
+                      const isLocked = p.quantity > 0;
                       return (
                         <tr key={p.id} className="hover:bg-gray-50/70 transition">
                           <td className="p-4 pl-6 font-semibold">
                             <div>{p.title}</div>
-                            <span className="text-xs text-gray-400 font-normal">Alert: {p.alertDaysBefore} days before</span>
                           </td>
-                          <td className="p-4 text-gray-500">{p.category?.name || p.categoryId || "N/A"}</td>
+                          <td className="p-4 text-gray-500">{p.category?.name || "Uncategorized"}</td>
                           <td className="p-4">
                             <div className="font-medium text-gray-700">Qty: {p.quantity}</div>
                             <div className="text-xs text-gray-400 font-mono">Lot: {p.lotNumber || "None"}</div>
@@ -133,7 +132,6 @@ export default function ShelfStorage() {
                             {new Date(p.expiryDate).toLocaleDateString()}
                           </td>
                           <td className="p-4 text-center">
-                            {/* 🔄 ক্লিক করলে স্ট্যাটাস চেইঞ্জ হবে */}
                             <button
                               onClick={() => handleToggleStatus(p.id, p.quantity)}
                               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition transform active:scale-95 ${
@@ -161,6 +159,7 @@ export default function ShelfStorage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddProductSubmit}
         isSubmitting={createProductMutation.isPending}
+        categories={categories} // ক্যাটাগরি লিস্ট প্রপ্স হিসেবে পাঠানো হলো
       />
     </div>
   );

@@ -134,10 +134,7 @@ export default function Topbar() {
       if (storedMerchant) {
         const parsed = JSON.parse(storedMerchant);
         setMerchantId(parsed.id);
-      } else {
-        // সেফটি ফলব্যাক: যদি কোনো কারণে লোকাল স্টোরেজে না থাকে, আপনার কারেন্ট আইডি বসে যাবে
-        setMerchantId("ce26355c-9b87-45af-97a9-f7f5b05c3745");
-      }
+      } 
     }
   }, []);
 

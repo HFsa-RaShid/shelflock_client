@@ -5,7 +5,7 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("Product API URL:", API_URL); 
+// console.log("Product API URL:", API_URL); 
 
 // ১. প্রোডাক্ট নিয়ে আসার হুক
 export const useGetProducts = (storeId: string) => {

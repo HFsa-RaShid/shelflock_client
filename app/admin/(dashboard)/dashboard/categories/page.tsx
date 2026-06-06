@@ -12,7 +12,7 @@ import {
 export default function CategoryManagement() {
   // 🏪 Zustand গ্লোবাল স্টেট থেকে কারেন্ট একটিভ স্টোর আইডি নেওয়া হচ্ছে
   const { currentStoreId } = useStoreContext();
-  console.log(currentStoreId);
+//   console.log(currentStoreId);
 
   // 🔄 TanStack Query Hooks (কারেন্ট স্টোর আইডির ওপর ভিত্তি করে কাজ করবে)
   const { data: categories = [], isLoading, isError } = useGetCategories(currentStoreId || "");
