@@ -1,9 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
-
 import StoreDropdown from "../topbar/StoreDropdown";
-import ViewStoreButton from "../topbar/ViewStoreButton";
 import NotificationBell from "../topbar/NotificationBell";
 import ProfileDropdown from "../topbar/ProfileDropdown";
 
@@ -32,7 +30,7 @@ export default function Topbar() {
             shopLogoSrc="/logo/favicon.svg"
           />
 
-          <ViewStoreButton />
+        
 
           <NotificationBell hasNotification={true} />
 

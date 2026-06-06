@@ -8,48 +8,40 @@ import SidebarHeader from "../sidebar/SidebarHeader";
 import SidebarSearch from "../sidebar/SidebarSearch";
 import SidebarGroup from "../sidebar/SidebarGroup";
 import SidebarSettingsDropdown from "../sidebar/SidebarSettingsDropdown";
-
 import DashboardIcon from "@/components/icons/DashboardIcon";
-import OrderIcon from "@/components/icons/OrderIcon";
-import ProductIcon from "@/components/icons/ProductIcon";
-import CustomerIcon from "@/components/icons/CustomerIcon";
-import DeliveryIcon from "@/components/icons/DeliveryIcon";
-import OfferIcon from "@/components/icons/OfferIcon";
 import AnalyticsIcon from "@/components/icons/AnalyticsIcon";
-import ManageShopIcon from "@/components/icons/ManageShopIcon";
-import LandingPagesIcon from "@/components/icons/LandingPagesIcon";
-import PermissionsIcon from "@/components/icons/PermissionsIcon";
 import HelpIcon from "@/components/icons/HelpIcon";
 
+
 const mainNavItems = [
-  { name: "Dashboard", href: "/admin/dashboard/overview", icon: DashboardIcon },
-  { name: "Order", href: "/admin/dashboard/orders", icon: OrderIcon },
-  { name: "Product", href: "/admin/dashboard/products", icon: ProductIcon },
-  { name: "Customer", href: "/admin/dashboard/customers", icon: CustomerIcon },
-  { name: "Delivery", href: "/admin/dashboard/delivery", icon: DeliveryIcon },
-  { name: "Offers", href: "/admin/dashboard/offers", icon: OfferIcon },
-  { name: "Analytics", href: "/admin/dashboard/analytics", icon: AnalyticsIcon },
+  { 
+    name: "Dashboard", 
+    href: "/admin/dashboard/overview", 
+    icon: DashboardIcon 
+  },
+  { 
+  name: "Categories", 
+  href: "/admin/dashboard/categories", 
+  icon: DashboardIcon 
+},
+  { 
+    name: "Shelf Storage",   
+    href: "/admin/dashboard/shelf", 
+    icon: DashboardIcon
+  },
+  { 
+    name: "Alert Rules",     
+    href: "/admin/dashboard/alerts", 
+    icon: DashboardIcon 
+  },
+  { 
+    name: "Analytics",       
+    href: "/admin/dashboard/analytics", 
+    icon: AnalyticsIcon 
+  },
 ];
 
-const shopSettingItems = [
-  {
-    name: "Manage Shop",
-    href: "/admin/dashboard/manage-shop",
-    icon: ManageShopIcon,
-  },
-  {
-    name: "Landing pages",
-    href: "/admin/dashboard/landing-pages",
-    icon: LandingPagesIcon,
-  },
-  {
-    name: "Users & permissions",
-    href: "/admin/dashboard/permissions",
-    icon: PermissionsIcon,
-  },
-];
-
-const otherItems = [{ name: "Help", href: "/admin/dashboard/help", icon: HelpIcon }];
+const otherItems = [{ name: "Help & Support", href: "/admin/dashboard/help", icon: HelpIcon }];
 
 const mobileVariants = {
   closed: {
@@ -104,17 +96,13 @@ function MobileSidebarDrawer() {
                 <SidebarSearch isCollapsed={false} onOpenSidebar={() => {}} />
                 <div className="flex w-full flex-col gap-[24px]">
                   <SidebarGroup
-                    title="Main"
+                    title="ShelfLock Core"
                     items={mainNavItems}
                     isCollapsed={false}
                   />
+                 
                   <SidebarGroup
-                    title="Shop Setting"
-                    items={shopSettingItems}
-                    isCollapsed={false}
-                  />
-                  <SidebarGroup
-                    title="Other"
+                    title="Support"
                     items={otherItems}
                     isCollapsed={false}
                   >
@@ -160,17 +148,13 @@ function DesktopSidebar() {
         />
         <div className="flex w-full flex-col gap-[24px]">
           <SidebarGroup
-            title="Main"
+            title="ShelfLock Core"
             items={mainNavItems}
             isCollapsed={isCollapsed}
           />
+          
           <SidebarGroup
-            title="Shop Setting"
-            items={shopSettingItems}
-            isCollapsed={isCollapsed}
-          />
-          <SidebarGroup
-            title="Other"
+            title="Support"
             items={otherItems}
             isCollapsed={isCollapsed}
           >

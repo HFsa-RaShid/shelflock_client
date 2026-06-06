@@ -1,72 +1,57 @@
 "use client";
-import React, { useState } from "react";
-import DashboardCard from "./_components/DashboardCard";
+import React from "react";
 
-
-
-
-
-const Analytics = () => {
-  const [timeframe, setTimeframe] = useState<string>("today");
-
-
+export default function Analytics() {
   return (
-    <div className=" min-h-screen ">
-      {/* টপ ফিল্টার ও সার্চ বার */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div className="relative w-full md:max-w-[554px] h-[36px]">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg
-              className="w-4 h-4 text-[#7F8482]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </span>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full h-full pl-9 pr-4 py-[9px] bg-white border border-[#E9E9E9] rounded-lg text-[14px] font-normal leading-[18px] text-[#0E2038] placeholder-[#7F8482] tracking-[0%] focus:outline-none focus:border-[#0E2038] transition-colors"
-          />
-        </div>
+    <div className="p-6 max-w-[1200px] mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-[#0E2038]">Storage & Expiry Analytics</h1>
+        <p className="text-sm text-gray-500 mt-1">Track shelf metrics, safe stock levels, and automated alert logs.</p>
+      </div>
 
-        <div className="flex items-center gap-2 self-end md:self-auto">
-          {["today", "week", "month"].map((type) => (
-            <button
-              key={type}
-              onClick={() => setTimeframe(type)}
-              className={`h-[36px] px-4 py-1.5 text-sm font-medium rounded-tl-lg rounded-tr-[6px] rounded-br-lg rounded-bl-lg tracking-[-1%] text-center capitalize transition-colors
-                ${timeframe === type ? "bg-[#0E2038] text-white" : "bg-white text-[#7F8482] border border-[#E9E9E9]"}`}
-            >
-              {type === "week" ? "This Week" : type}
-            </button>
-          ))}
-          <button className="flex items-center gap-2 h-[36px] px-4 py-2 bg-white border border-[#E9E9E9] rounded-tl-lg rounded-tr-[6px] rounded-br-lg rounded-bl-lg text-sm font-medium text-[#0E2038] hover:bg-gray-50 transition-colors">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M8.00008 4V9.33333M6.33341 7.66667L8.00008 9.33333L9.66675 7.66667M13.3334 8V10C13.3334 11.1046 12.438 12 11.3334 12H4.66675C3.56218 12 2.66675 11.1046 2.66675 10V8"
-                stroke="#0E2038"
-                strokeWidth="1.33333"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Export
-          </button>
+      {/* Grid Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <h4 className="text-xs font-bold text-gray-400 uppercase">Alert Execution Success Rate</h4>
+          <p className="text-2xl font-bold text-[#0E2038] mt-2">99.4%</p>
+          <span className="text-[11px] text-green-600 font-medium">3,421 dispatches delivered safely</span>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <h4 className="text-xs font-bold text-gray-400 uppercase">Average Safe-Lock Period</h4>
+          <p className="text-2xl font-bold text-[#0E2038] mt-2">42.5 Days</p>
+          <span className="text-[11px] text-gray-400">Duration items remain safely locked</span>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+          <h4 className="text-xs font-bold text-gray-400 uppercase">Waste Prevention Index</h4>
+          <p className="text-2xl font-bold text-green-600 mt-2">+88.2%</p>
+          <span className="text-[11px] text-gray-400">Items saved from disposal due to alerts</span>
         </div>
       </div>
 
-
-<DashboardCard timeframe={timeframe}></DashboardCard>
+      {/* Logs Table Simulation */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-gray-50">
+          <h3 className="text-sm font-bold text-[#0E2038] uppercase tracking-wider">Recent Dispatched Alert Triggers</h3>
+        </div>
+        <div className="p-4 space-y-3">
+          {[
+            { id: "#ALT-9082", item: "Nestle Cerelac Wheat", trigger: "7-Days Pre-Expiry Alert", target: "SMS & In-App", time: "Today, 09:12 AM" },
+            { id: "#ALT-8941", item: "Dano Powdered Milk 1kg", trigger: "3-Days Pre-Expiry Alert", target: "SMS Blast", time: "Yesterday, 04:30 PM" },
+            { id: "#ALT-8760", item: "Calpol Paediatric Drops", trigger: "30-Days Pre-Expiry Alert", target: "Email Loop", time: "2 days ago" },
+          ].map((log, index) => (
+            <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-100 rounded-xl gap-2 hover:border-gray-200 transition">
+              <div>
+                <span className="text-xs font-mono text-gray-400">{log.id}</span>
+                <h4 className="text-sm font-bold text-[#0E2038] mt-0.5">{log.item}</h4>
+              </div>
+              <div className="text-left sm:text-right">
+                <p className="text-xs font-semibold text-[#F74608] bg-orange-50 px-2 py-0.5 rounded inline-block">{log.trigger}</p>
+                <p className="text-xs text-gray-400 mt-1">Dispatched via {log.target} • <span className="font-medium text-gray-500">{log.time}</span></p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Analytics;
+}
