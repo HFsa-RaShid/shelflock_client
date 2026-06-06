@@ -45,7 +45,7 @@ export default function SidebarHeader({
         }`}
       >
         {/* Brand Logo Wrapper */}
-        <Link href="/admin/dashboard/overview" className="flex items-center shrink-0">
+        {/* <Link href="/admin/dashboard/overview" className="flex items-center shrink-0">
           <motion.div
             className="relative h-[24px] overflow-hidden flex items-center"
             initial={isCollapsed ? "collapsed" : "expanded"}
@@ -93,7 +93,7 @@ export default function SidebarHeader({
               )}
             </AnimatePresence>
           </motion.div>
-        </Link>
+        </Link> */}
 
         {/* Action Toggle Button Container */}
         <div className="flex items-center shrink-0 lg:ml-auto">

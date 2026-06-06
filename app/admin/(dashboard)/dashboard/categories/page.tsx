@@ -1,21 +1,24 @@
 "use client";
 import React, { useState } from "react";
-
-interface Category {
-  id: number;
-  name: string;
-  itemCount: number;
-  description: string;
-  status: "Active" | "Inactive";
-}
+// Zustand এবং TanStack Query হুক্স ইম্পোর্ট
+import { useStoreContext } from "@/store/useStoreContext";
+import { 
+  useGetCategories, 
+  useCreateCategory, 
+  useToggleCategoryStatus, 
+  useDeleteCategory 
+} from "@/hooks/useCategory";
 
 export default function CategoryManagement() {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: "Groceries", itemCount: 452, description: "Daily cooking essentials.", status: "Active" },
-    { id: 2, name: "Pharmacy", itemCount: 189, description: "Prescription drugs and syrups.", status: "Active" },
-    { id: 3, name: "Dairy & Bakery", itemCount: 94, description: "Fresh milk, butter, and bread.", status: "Active" },
-    { id: 4, name: "Cosmetics", itemCount: 107, description: "Skincare and beauty essentials.", status: "Inactive" },
-  ]);
+  // 🏪 Zustand গ্লোবাল স্টেট থেকে কারেন্ট একটিভ স্টোর আইডি নেওয়া হচ্ছে
+  const { currentStoreId } = useStoreContext();
+  console.log(currentStoreId);
+
+  // 🔄 TanStack Query Hooks (কারেন্ট স্টোর আইডির ওপর ভিত্তি করে কাজ করবে)
+  const { data: categories = [], isLoading, isError } = useGetCategories(currentStoreId || "");
+  const createCategoryMutation = useCreateCategory(currentStoreId || "");
+  const toggleStatusMutation = useToggleCategoryStatus(currentStoreId || "");
+  const deleteCategoryMutation = useDeleteCategory(currentStoreId || "");
 
   // স্টেটস
   const [activeTab, setActiveTab] = useState<"All" | "Active" | "Inactive">("All");
@@ -23,48 +26,59 @@ export default function CategoryManagement() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  // নতুন ক্যাটাগরি যোগ করা
+  // নতুন ক্যাটাগরি যোগ করা (POST)
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !currentStoreId) return;
 
-    const newCategory: Category = {
-      id: Date.now(),
-      name: name,
-      itemCount: 0,
-      description: description || "No description provided.",
-      status: "Active",
-    };
-
-    setCategories([...categories, newCategory]);
-    setName("");
-    setDescription("");
-    setIsModalOpen(false);
-  };
-
-  // স্ট্যাটাস টগল করা (Active <-> Inactive)
-  const toggleStatus = (id: number) => {
-    setCategories(
-      categories.map((cat) =>
-        cat.id === id
-          ? { ...cat, status: cat.status === "Active" ? "Inactive" : "Active" }
-          : cat
-      )
+    createCategoryMutation.mutate(
+      { name, description },
+      {
+        onSuccess: () => {
+          setName("");
+          setDescription("");
+          setIsModalOpen(false);
+        },
+        onError: (error: any) => {
+          alert("ক্যাটাগরি তৈরি করতে সমস্যা হয়েছে: " + error.message);
+        }
+      }
     );
   };
 
-  // ক্যাটাগরি ডিলিট করা
-  const handleDelete = (id: number) => {
+  // স্ট্যাটাস টগল করা (Active <-> Inactive - PATCH)
+  const toggleStatus = (id: string, currentStatus: "Active" | "Inactive") => {
+    if (!currentStoreId) return;
+    const nextStatus = currentStatus === "Active" ? "Inactive" : "Active";
+    
+    toggleStatusMutation.mutate({
+      id,
+      data: { status: nextStatus },
+    });
+  };
+
+  // ক্যাটাগরি ডিলিট করা (DELETE)
+  const handleDelete = (id: string) => {
+    if (!currentStoreId) return;
     if (confirm("Are you sure you want to delete this category?")) {
-      setCategories(categories.filter((cat) => cat.id !== id));
+      deleteCategoryMutation.mutate(id);
     }
   };
 
-  // ট্যাব অনুযায়ী ডাটা ফিল্টার
+  // ট্যাব অনুযায়ী ডাটা ফিল্টার
   const filteredCategories = categories.filter((cat) => {
     if (activeTab === "All") return true;
     return cat.status === activeTab;
   });
+
+  // স্টোর আইডি না থাকলে ওয়ার্নিং স্ক্রিন দেখাবে
+  if (!currentStoreId) {
+    return (
+      <div className="p-12 text-center border border-dashed rounded-2xl text-gray-400 max-w-[1200px] mx-auto mt-6">
+        ⚠️ কোনো একটিভ স্টোর পাওয়া যায়নি। অনুগ্রহ করে প্রথমে একটি স্টোর সিলেক্ট করুন।
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
@@ -101,60 +115,72 @@ export default function CategoryManagement() {
         ))}
       </div>
 
-      {/* টেবিল ভিউ */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                <th className="p-4 pl-6">Category Name</th>
-                <th className="p-4">Description</th>
-                <th className="p-4 text-center">Items Count</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 text-right pr-6">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-[#0E2038] divide-y divide-gray-50">
-              {filteredCategories.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
-                    No categories found in this tab.
-                  </td>
+      {/* কন্টেন্ট এরিয়া (লোডিং, এরর অথবা টেবিল) */}
+      {isLoading ? (
+        <div className="p-12 text-center text-sm text-gray-500 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          क্যাটাগরি ডাটা লোড হচ্ছে...
+        </div>
+      ) : isError ? (
+        <div className="p-12 text-center text-sm text-red-500 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          ডাটা ফেচ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                  <th className="p-4 pl-6">Category Name</th>
+                  <th className="p-4">Description</th>
+                  <th className="p-4 text-center">Status</th>
+                  <th className="p-4 text-right pr-6">Actions</th>
                 </tr>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-gray-50/50 transition">
-                    <td className="p-4 pl-6 font-semibold max-w-[200px] truncate">{cat.name}</td>
-                    <td className="p-4 text-gray-500 max-w-[300px] truncate">{cat.description}</td>
-                    <td className="p-4 text-center font-mono font-medium">{cat.itemCount}</td>
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => toggleStatus(cat.id)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition ${
-                          cat.status === "Active"
-                            ? "bg-green-50 text-green-700 hover:bg-green-100"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${cat.status === "Active" ? "bg-green-500" : "bg-gray-400"}`}></span>
-                        {cat.status}
-                      </button>
-                    </td>
-                    <td className="p-4 text-right pr-6 space-x-3">
-                      <button 
-                        onClick={() => handleDelete(cat.id)}
-                        className="text-gray-400 hover:text-red-500 text-xs font-semibold transition"
-                      >
-                        Delete
-                      </button>
+              </thead>
+              <tbody className="text-sm text-[#0E2038] divide-y divide-gray-50">
+                {filteredCategories.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-gray-400">
+                      No categories found in this tab.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredCategories.map((cat) => (
+                    <tr key={cat.id} className="hover:bg-gray-50/50 transition">
+                      <td className="p-4 pl-6 font-semibold max-w-[200px] truncate">{cat.name}</td>
+                      <td className="p-4 text-gray-500 max-w-[300px] truncate">
+                        {cat.description || <span className="text-gray-300 italic">No description</span>}
+                      </td>
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() => toggleStatus(cat.id, cat.status)}
+                          disabled={toggleStatusMutation.isPending}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition ${
+                            cat.status === "Active"
+                              ? "bg-green-50 text-green-700 hover:bg-green-100"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          } disabled:opacity-50`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${cat.status === "Active" ? "bg-green-500" : "bg-gray-400"}`}></span>
+                          {cat.status}
+                        </button>
+                      </td>
+                      <td className="p-4 text-right pr-6 space-x-3">
+                        <button 
+                          onClick={() => handleDelete(cat.id)}
+                          disabled={deleteCategoryMutation.isPending}
+                          className="text-gray-400 hover:text-red-500 text-xs font-semibold transition disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* এড ক্যাটাগরি পপআপ মোডাল */}
       {isModalOpen && (
@@ -204,9 +230,10 @@ export default function CategoryManagement() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#F74608] px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition shadow-sm"
+                  disabled={createCategoryMutation.isPending}
+                  className="rounded-xl bg-[#F74608] px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition shadow-sm disabled:opacity-70"
                 >
-                  Save Category
+                  {createCategoryMutation.isPending ? "Saving..." : "Save Category"}
                 </button>
               </div>
             </form>
