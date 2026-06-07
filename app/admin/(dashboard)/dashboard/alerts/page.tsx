@@ -59,7 +59,7 @@ export default function AlertRules() {
 
     const payload = {
       intervals: selectedIntervals,
-      customMessage: "", // ব্যাকএন্ড এর ডিফল্ট মেসেজ ব্যবহারের জন্য খালি পাঠানো হচ্ছে
+      customMessage: "", 
       whatsappNumber: fullPhoneNumber,
       channels: channels,
     };
@@ -80,7 +80,7 @@ export default function AlertRules() {
   };
 
   return (
-    <div className="p-6 max-w-[1200px] mx-auto space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-[#0E2038]">Alert Rules Configuration</h1>
         <p className="text-sm text-gray-500 mt-1">Configure multi-stage automated message rules prior to lock expiration.</p>

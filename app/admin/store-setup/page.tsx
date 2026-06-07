@@ -24,7 +24,7 @@ export default function StoreSetupPage() {
       const merchant = JSON.parse(storedMerchant);
       setMerchantId(merchant.id);
     } else {
-      router.push("/auth/login");
+      router.push("/admin");
       return;
     }
 
@@ -54,7 +54,7 @@ export default function StoreSetupPage() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0E2038] px-4 overflow-y-auto">
       
-      {/* 🎯 ইনলাইন স্টাইল (style={{...}}) দিয়ে প্যাডিং ও উইডথ একদম ফিক্সড করে দেওয়া হলো */}
+      
       <div 
         className="w-full rounded-2xl shadow-2xl border border-gray-100 my-8 transform transition-all"
         style={{

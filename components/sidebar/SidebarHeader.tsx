@@ -113,12 +113,12 @@ export default function SidebarHeader({
               variants={toggleIconVariants}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <Image
+              {/* <Image
                 src="/icon/sidebar.png"
                 alt="Toggle Sidebar"
                 fill
                 className="object-contain"
-              />
+              /> */}
             </motion.div>
           </button>
 

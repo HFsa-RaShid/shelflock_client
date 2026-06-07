@@ -5,12 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import SidebarHeader from "../sidebar/SidebarHeader";
-import SidebarSearch from "../sidebar/SidebarSearch";
 import SidebarGroup from "../sidebar/SidebarGroup";
 import SidebarSettingsDropdown from "../sidebar/SidebarSettingsDropdown";
 import DashboardIcon from "@/components/icons/DashboardIcon";
-import AnalyticsIcon from "@/components/icons/AnalyticsIcon";
 import HelpIcon from "@/components/icons/HelpIcon";
+import SidebarLogout from "./sidebar/sidebar-logout";
 
 
 const mainNavItems = [
@@ -20,10 +19,10 @@ const mainNavItems = [
     icon: DashboardIcon 
   },
   { 
-  name: "Categories", 
-  href: "/admin/dashboard/categories", 
-  icon: DashboardIcon 
-},
+    name: "Categories", 
+    href: "/admin/dashboard/categories", 
+    icon: DashboardIcon 
+  },
   { 
     name: "Shelf Storage",   
     href: "/admin/dashboard/shelf", 
@@ -33,11 +32,6 @@ const mainNavItems = [
     name: "Alert Rules",     
     href: "/admin/dashboard/alerts", 
     icon: DashboardIcon 
-  },
-  { 
-    name: "Analytics",       
-    href: "/admin/dashboard/analytics", 
-    icon: AnalyticsIcon 
   },
 ];
 
@@ -89,11 +83,10 @@ function MobileSidebarDrawer() {
               animate="open"
               exit="closed"
               variants={mobileVariants}
-              className="fixed inset-y-0 left-0 z-50 flex h-full w-[248px] flex-col overflow-y-auto bg-[#F8F9FA] p-4 scrollbar-none"
+              className="fixed inset-y-0 left-0 z-50 flex h-full w-[248px] flex-col overflow-y-auto bg-[#F8F9FA] p-4 scrollbar-none justify-between"
             >
               <div className="flex w-full flex-col gap-[24px]">
                 <SidebarHeader isCollapsed={false} onToggle={() => {}} />
-                <SidebarSearch isCollapsed={false} onOpenSidebar={() => {}} />
                 <div className="flex w-full flex-col gap-[24px]">
                   <SidebarGroup
                     title="ShelfLock Core"
@@ -112,6 +105,11 @@ function MobileSidebarDrawer() {
                     />
                   </SidebarGroup>
                 </div>
+              </div>
+
+              {/* 🎯 মোবাইল সাইডবার বটম বাটন ফিক্স */}
+              <div className="w-full pt-4 border-t border-gray-200/60 mt-auto bg-[#F8F9FA] relative z-50">
+                <SidebarLogout isCollapsed={false} />
               </div>
             </motion.aside>
           )}
@@ -135,16 +133,13 @@ function DesktopSidebar() {
       animate={isCollapsed ? "collapsed" : "expanded"}
       variants={desktopVariants}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="sticky top-0 hidden h-screen shrink-0 flex-col bg-[#F8F9FA] p-4 lg:flex"
+      className="sticky top-0 hidden h-screen shrink-0 flex-col bg-[#F8F9FA] p-4 lg:flex justify-between relative"
     >
-      <div className="flex w-full flex-col gap-[32px]">
+      {/* 🎯 ডেসক্টপ সাইডবার মেইন কন্টেন্ট */}
+      <div className="flex w-full flex-col gap-[32px] overflow-y-auto pb-20 scrollbar-none">
         <SidebarHeader
           isCollapsed={isCollapsed}
           onToggle={() => setIsCollapsed(!isCollapsed)}
-        />
-        <SidebarSearch
-          isCollapsed={isCollapsed}
-          onOpenSidebar={() => setIsCollapsed(false)}
         />
         <div className="flex w-full flex-col gap-[24px]">
           <SidebarGroup
@@ -164,6 +159,11 @@ function DesktopSidebar() {
             />
           </SidebarGroup>
         </div>
+      </div>
+
+      {/* ফিক্সড বটম লগআউট সেকশন */ }
+      <div className="w-full pt-4 border-t border-gray-200/60 mt-auto bg-[#F8F9FA] relative z-[50] pb-2">
+        <SidebarLogout isCollapsed={isCollapsed} />
       </div>
     </motion.aside>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 // Zustand এবং TanStack Query হুক্স ইম্পোর্ট
@@ -81,7 +82,7 @@ export default function CategoryManagement() {
   }
 
   return (
-    <div className="p-6 max-w-[1200px] mx-auto space-y-6">
+    <div className="p-6 space-y-6">
       {/* হেডার সেকশন এবং রাইট টপ বাটন */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
