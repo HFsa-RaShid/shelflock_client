@@ -48,7 +48,7 @@ export default function AddProductModal({ isOpen, onClose, onSubmit, isSubmittin
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       {/* max-w-lg এবং mx-auto দিয়ে মোডালের ফিক্সড ও সুন্দর উইডথ নিশ্চিত করা হয়েছে */}
-      <div className="bg-white w-full max-w-lg mx-auto rounded-2xl border border-gray-100 shadow-xl overflow-hidden relative">
+      <div className="bg-white max-w-[420px] mx-auto rounded-2xl border border-gray-100 shadow-xl overflow-hidden relative">
         
         {/* Modal Header */}
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">

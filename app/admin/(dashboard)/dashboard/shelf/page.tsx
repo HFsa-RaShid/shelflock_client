@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { Plus, Filter } from "lucide-react";
+import { Plus, Filter, CheckCircle, XCircle } from "lucide-react"; // আইকন পরিবর্তন করে Active/Inactive এর সাথে সামঞ্জস্য করা হলো
 import { useStoreContext } from "@/store/useStoreContext";
 import { useGetProducts, useCreateProduct, useUpdateProduct } from "@/hooks/useProduct";
-import { useGetCategories } from "@/hooks/useCategory"; // ক্যাটাগরি হুক ইমপোর্ট করা হলো
+import { useGetCategories } from "@/hooks/useCategory"; 
 import AddProductModal from "./AddProductModal";
+import toast from "react-hot-toast";
 
 export default function ShelfStorage() {
   const { currentStoreId } = useStoreContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("All");
 
-  // রিয়্যাক্ট কোয়েরি হুক এপিআই কল
+  // রিয়্যাক্ট কোয়েরি হুক এپیআই কল
   const { data: products = [], isLoading: isProductsLoading } = useGetProducts(currentStoreId);
   const { data: categories = [], isLoading: isCategoriesLoading } = useGetCategories(currentStoreId || "");
   
@@ -26,22 +27,45 @@ export default function ShelfStorage() {
       { productData: formData, storeId: currentStoreId },
       {
         onSuccess: () => {
-          setIsModalOpen(false); // সফল হলে মোডাল বন্ধ হবে
+          setIsModalOpen(false); 
+          toast.success("Product added to shelf successfully!");
         },
+        onError: () => {
+          toast.error("Failed to add product.");
+        }
       }
     );
   };
 
-  // টেবিলে লাইভ স্ট্যাটাস সুইচ বা পরিবর্তন করার মেথড
-  const handleToggleStatus = (id: string, currentQuantity: number) => {
-    const targetQuantity = currentQuantity > 0 ? 0 : 5; // সিম্পল টগল এক্সাম্পল
-    updateProductMutation.mutate({
-      id,
-      updateData: { quantity: targetQuantity },
+  // 🎯 লাইভ স্ট্যাটাস (Active / Inactive) পরিবর্তন ও টোস্ট অ্যালার্ট ফিক্সড লজিক
+  const handleToggleStatus = (id: string, currentStatus: string, title: string) => {
+    // Active থাকলে Inactive হবে, অন্যথায় Active হবে
+    const targetStatus = currentStatus === "Active" ? "Inactive" : "Active"; 
+    
+    const updatePromise = new Promise((resolve, reject) => {
+      updateProductMutation.mutate(
+        {
+          id,
+          updateData: { status: targetStatus },
+        },
+        {
+          onSuccess: () => resolve(targetStatus),
+          onError: (err) => reject(err),
+        }
+      );
+    });
+
+    toast.promise(updatePromise, {
+      loading: `'${title}' status updating...`,
+      success: (status) => 
+        status === "Active" 
+          ? `'${title}' is now Active! (Alerts Enabled)` 
+          : `'${title}' is now Inactive! (Alerts Muted)`,
+      error: "Could not update status.",
     });
   };
 
-  // ডাইনামিক ক্যাটাগরি ফিল্টারিং লজিক (ID দিয়ে ম্যাচ করা হচ্ছে)
+  // ডাইনামিক ক্যাটাগরি ফিল্টারিং লজিক
   const filteredProducts = products.filter((p: any) => {
     if (selectedCategoryId === "All") return true;
     return p.categoryId === selectedCategoryId;
@@ -75,7 +99,7 @@ export default function ShelfStorage() {
 
       {currentStoreId && (
         <>
-          {/* 🎯 ফিল্টার সেকশন (ডাইনামিক ক্যাটাগরি ড্রপডাউন) */}
+          {/* 🎯 ফিল্টার সেকশন */}
           <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-100 shadow-sm max-w-xs">
             <Filter className="w-4 h-4 text-gray-400 shrink-0" />
             <select
@@ -115,9 +139,10 @@ export default function ShelfStorage() {
                       <th className="p-4 text-center">Status / Action</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm text-[#0E2038] divide-y divide-gray-50">
+                  <tbody className="text-sm text-[#0E2038] ">
                     {filteredProducts.map((p: any) => {
-                      const isLocked = p.quantity > 0;
+                      // 🎯 ঠিক করা লজিক: সরাসরি 'Active' চেক
+                      const isActive = p.status === "Active"; 
                       return (
                         <tr key={p.id} className="hover:bg-gray-50/70 transition">
                           <td className="p-4 pl-6 font-semibold">
@@ -132,14 +157,27 @@ export default function ShelfStorage() {
                             {new Date(p.expiryDate).toLocaleDateString()}
                           </td>
                           <td className="p-4 text-center">
+                            {/* 🔄 লাইভ স্ট্যাটাস বাটন (ফিক্সড টেক্সট ও কালার) */}
                             <button
-                              onClick={() => handleToggleStatus(p.id, p.quantity)}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition transform active:scale-95 ${
-                                isLocked ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                              type="button"
+                              onClick={() => handleToggleStatus(p.id, p.status, p.title)}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all transform active:scale-95 shadow-2xs ${
+                                isActive 
+                                  ? "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" 
+                                  : "bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100"
                               }`}
                             >
-                              <span className={`w-1.5 h-1.5 rounded-full ${isLocked ? "bg-green-600" : "bg-amber-500"}`}></span>
-                              {isLocked ? "Locked" : "Unlocked"}
+                              {isActive ? (
+                                <>
+                                  <CheckCircle className="w-3 h-3 text-green-600" />
+                                  <span>Active</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-3 h-3 text-orange-500" />
+                                  <span>Inactive</span>
+                                </>
+                              )}
                             </button>
                           </td>
                         </tr>
@@ -159,7 +197,7 @@ export default function ShelfStorage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddProductSubmit}
         isSubmitting={createProductMutation.isPending}
-        categories={categories} // ক্যাটাগরি লিস্ট প্রপ্স হিসেবে পাঠানো হলো
+        categories={categories} 
       />
     </div>
   );
