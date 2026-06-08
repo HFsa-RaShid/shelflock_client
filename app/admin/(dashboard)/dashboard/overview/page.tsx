@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useMemo } from "react";
-import { useStoreContext } from "@/store/useStoreContext";
-import { useGetProducts } from "@/hooks/useProduct";
+
 import { 
-  Package, 
   ShieldCheck, 
   AlertTriangle, 
-  Trash2, 
   Loader2, 
   TrendingUp,
   Activity,
@@ -19,6 +16,8 @@ import { differenceInDays, isAfter, isBefore, startOfDay } from "date-fns";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import highcharts3d from "highcharts/highcharts-3d";
+import { useStoreContext } from "@/store/useStoreContext";
+import { useGetProducts } from "@/hooks/useProduct";
 
 if (typeof window !== "undefined") {
   const init3D = (highcharts3d as any).default || highcharts3d;
