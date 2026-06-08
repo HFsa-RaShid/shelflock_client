@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import ProfileIcon from "@/components/icons/ProfileIcon";
 import LogoutIcon from "@/components/icons/LogoutIcon";
-import { clearAuthSession } from "@/lib/auth";
-import { AUTH_ROUTES } from "@/lib/constants";
 
 interface ProfileDropdownProps {
   imageUrl: string;
@@ -35,8 +33,15 @@ export default function ProfileDropdown({ imageUrl }: ProfileDropdownProps) {
 
   const handleLogout = async () => {
     setIsOpen(false);
-    await clearAuthSession();
-    router.push(AUTH_ROUTES.signin);
+
+    // 💡 সরাসরি ব্রাউজার মেমোরি ক্লিয়ার করার কোড
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+
+    // 💡 lib ফোল্ডার না থাকায় সরাসরি স্ট্রিং পাথ হিসেবে সাইন-ইন পেজে রিডাইরেক্ট করা হলো
+    router.push("/signin"); 
     router.refresh();
   };
 
