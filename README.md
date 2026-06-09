@@ -1,10 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Merchant Dashboard - Alert Rules Management System
 
-## Getting Started
+This is a modern, high-performance **Next.js** project optimized for managing merchant stores and automating multi-stage message notifications/alerts prior to lock expiration.
 
-First, run the development server:
+---
+
+## 🛠️ Tech Stack & Key Features
+
+* **Framework:** [Next.js (App Router)](https://nextjs.org/) for server-side rendering and routing.
+* **State Management:** [Zustand](https://github.com/pmndrs/zustand) with `persist` middleware to manage global store configurations seamlessly.
+* **Data Fetching:** [TanStack Query (React Query)](https://tanstack.com/query/latest) for efficient API caching, sync, and mutations.
+* **UI & Styling:** [Tailwind CSS](https://tailwindcss.com/) for fully responsive, slick dark/light theme component variations.
+* **Form Inputs:** [React Phone Input 2](https://github.com/bluewebtech/react-phone-input-2) for robust country-code dropdown selection and validation.
+
+---
+
+## ⚡ Getting Started
+
+### 1. Prerequisites
+Ensure you have **Node.js (v18+)** installed on your local machine.
+
+### 2. Installation
+Clone the repository and install the dependencies:
+
 
 ```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+3. Run the Development Server
+Execute one of the following commands to start the local server:
+
+```
 npm run dev
 # or
 yarn dev
@@ -14,23 +44,21 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📁 Key Configurations Inside Project
+🔔 Alert Rules System (/alerts/page.tsx)
+Configures multi-stage automated message channels (WhatsApp, Email) based on dynamic trigger intervals (e.g., 30, 7, 3 days before expiry). It automatically synchronizes with the dynamic currentStore phone context for a smooth user experience.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🏪 Store Context Management (/store/useStoreContext.ts)
+Uses Zustand to manage global reactive state for:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+currentStoreId (Active store identification)
 
-## Learn More
+currentStore (Full object synchronization including merchant name & fallback contact numbers)
 
-To learn more about Next.js, take a look at the following resources:
+🚀 Build & Deployment
+Production Build
+To compile and optimize the application for production:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+npm run build
+```
