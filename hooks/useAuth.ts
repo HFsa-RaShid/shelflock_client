@@ -1,5 +1,3 @@
-
-
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // import { useMutation, useQueryClient } from "@tanstack/react-query"; // 👈 useQueryClient ইম্পোর্ট করুন
 // import axios from "axios";
@@ -26,7 +24,7 @@
 
 // export const useMerchantLogin = () => {
 //   const router = useRouter();
-//   const queryClient = useQueryClient(); 
+//   const queryClient = useQueryClient();
 //   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 //   const setCurrentStoreId = useStoreContext((state) => state.setCurrentStoreId);
 
@@ -92,7 +90,6 @@
 //   });
 // };
 
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -119,11 +116,11 @@ interface LoginInput {
 
 export const useMerchantLogin = () => {
   const router = useRouter();
-  const queryClient = useQueryClient(); 
-  
+  const queryClient = useQueryClient();
+
   // 💡 env ভ্যারিয়েবলের ঝামেলা বাদ দিয়ে সরাসরি আপনার লাইভ সার্ভার এপিআই রুট বসানো হলো
-  const BASE_URL = "https://shelflock-server.vercel.app/api/v1"; 
-  
+  const BASE_URL = "https://shelflock-client.vercel.app/api/v1";
+
   const setCurrentStoreId = useStoreContext((state) => state.setCurrentStoreId);
 
   return useMutation<LoginResponse, Error, LoginInput>({
@@ -136,13 +133,13 @@ export const useMerchantLogin = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       return response.data;
     },
     onSuccess: async (data) => {
       toast.success(data.message || "লগইন সফল হয়েছে! 🎉");
-      
+
       // ১. টোকেন ও মার্চেন্ট ডাটা লোকাল সেভ
       Cookies.set("token", data.token, {
         expires: 7,
@@ -161,8 +158,8 @@ export const useMerchantLogin = () => {
             const response = await axios.get(`${BASE_URL}/stores/my-stores`, {
               params: { merchantId },
               headers: {
-                "Authorization": `Bearer ${data.token}` // 💡 সেফটি হিসেবে টোকেন পাস করা হলো
-              }
+                Authorization: `Bearer ${data.token}`, // 💡 সেফটি হিসেবে টোকেন পাস করা হলো
+              },
             });
             return response.data.data;
           },
