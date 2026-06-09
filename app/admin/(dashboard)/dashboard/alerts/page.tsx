@@ -207,16 +207,14 @@
 import React, { useState, useEffect } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-
+import { useStoreContext } from "@/store/useStoreContext"; // আপনার স্টোর কনটেক্সট
 import { useGetAlertRule, useSaveAlertRule } from "@/hooks/useAlertRule";
-import { useStoreContext } from "@/store/useStoreContext";
 
 export default function AlertRules() {
   // ১. কনটেক্সট থেকে প্রয়োজনীয় ডেটা নেওয়া হলো
-  // (আপনার কনটেক্সট স্ট্রাকচারে ডিরেক্ট currentStorePhone থাকলে তাও আসবে, অথবা currentStore অবজেক্ট থাকলে সেখান থেকেও ফোন নম্বর বের করা যাবে)
   const { currentStoreId, currentStorePhone, currentStore } = useStoreContext(); 
 
-  // ২. স্টেট ম্যানেজমেন্ট (শুরুতে ফোন নম্বর একদম খালি রাখা হয়েছে)
+  // ২. স্টেট ম্যানেজমেন্ট
   const [selectedIntervals, setSelectedIntervals] = useState<number[]>([30, 7, 3]);
   const [fullPhoneNumber, setFullPhoneNumber] = useState<string>(""); 
   const [channels, setChannels] = useState<string[]>(["WhatsApp Alert", "Email Dispatch"]);
@@ -227,27 +225,25 @@ export default function AlertRules() {
   const { data: alertRule, isLoading } = useGetAlertRule(currentStoreId || "");
   const saveAlertRuleMutation = useSaveAlertRule(currentStoreId || "");
 
-  // 🔄 ৪. এপিআই ডেটা অথবা স্টোর ক্রিয়েট করার সময় দেওয়া ফোন নম্বর সিন্ক (Pre-fill) লজিক
+  // 🔄 ৪. এপিআই ডেটা অথবা স্টোর ক্রিয়েশনের ফোন নম্বর সিঙ্ক লজিক
   useEffect(() => {
-    // যদি ডাটাবেজে আগে থেকেই এই স্টোরের কোনো এলার্ট রুল সেভ করা থাকে
-    if (alertRule) {
+    // ক) যদি ডাটাবেজে আগে থেকেই এই স্টোরের কোনো এলার্ট রুল সেভ করা থাকে
+    if (alertRule && alertRule.whatsappNumber) {
       if (alertRule.intervals) setSelectedIntervals(alertRule.intervals);
       if (alertRule.channels) setChannels(alertRule.channels);
-      
-      if (alertRule.whatsappNumber) {
-        setFullPhoneNumber(alertRule.whatsappNumber);
-        return; 
-      }
+      setFullPhoneNumber(alertRule.whatsappNumber);
+      return; 
     }
 
-    // 🎯 যদি এলার্ট রুলসে নম্বর না থাকে, তবে স্টোর ক্রিয়েশনের সময় দেওয়া নম্বরটি বসবে
-    // এখানে ২ স্তরের ব্যাকআপ রাখা হয়েছে যেন আপনার কনটেক্সটের যেকোনো স্ট্রাকচার থেকেই নম্বরটি পেয়ে যায়
+    // খ) ডাটাবেজে রুলস না থাকলে কনটেক্সট/স্টোর ক্রিয়েশনের সময় দেওয়া নম্বরটি বসবে
     const fallbackPhone = currentStorePhone || currentStore?.phone || currentStore?.whatsapp || "";
     
     if (fallbackPhone) {
-      setFullPhoneNumber(fallbackPhone);
+      // ফোন নম্বরের শুরুতে যদি '+' বা কান্ট্রি কোড না থাকে, PhoneInput এর সুবিধার্থে শুধু নম্বর পাস করা হচ্ছে
+      const cleanPhone = fallbackPhone.toString().replace(/[^0-9]/g, "");
+      setFullPhoneNumber(cleanPhone);
     } else {
-      setFullPhoneNumber(""); // কোনো নম্বর না পাওয়া গেলে ব্ল্যাঙ্ক থাকবে, আগের হার্ডকোডেড নম্বর দেখাবে না
+      setFullPhoneNumber(""); 
     }
   }, [alertRule, currentStorePhone, currentStore, currentStoreId]);
 
@@ -332,7 +328,9 @@ export default function AlertRules() {
               Merchant WhatsApp Notification Number
             </label>
             <div className="max-w-md alert-phone-input">
+              {/* 🎯 key={currentStoreId} দেওয়ার কারণে স্টোর পরিবর্তনের সাথে সাথে ইনপুট ফিল্ডের ক্যাশ ক্লিন হয়ে ফোর্স রি-রেন্ডার হবে */}
               <PhoneInput
+                key={currentStoreId || "loading"}
                 country={"bd"} 
                 value={fullPhoneNumber}
                 onChange={(phone) => setFullPhoneNumber(phone)} 
