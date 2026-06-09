@@ -119,7 +119,7 @@ export const useMerchantLogin = () => {
   const queryClient = useQueryClient();
 
   // 💡 env ভ্যারিয়েবলের ঝামেলা বাদ দিয়ে সরাসরি আপনার লাইভ সার্ভার এপিআই রুট বসানো হলো
-  const BASE_URL = "https://shelflock-client.vercel.app/api/v1";
+  const BASE_URL = "https://shelflock-server.vercel.app/api/v1";
 
   const setCurrentStoreId = useStoreContext((state) => state.setCurrentStoreId);
 
