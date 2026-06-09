@@ -207,45 +207,51 @@
 import React, { useState, useEffect } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { useStoreContext } from "@/store/useStoreContext"; // আপনার স্টোর কনটেক্সট
+
 import { useGetAlertRule, useSaveAlertRule } from "@/hooks/useAlertRule";
+import { useStoreContext } from "@/store/useStoreContext";
 
 export default function AlertRules() {
-  // 🎯 কনটেক্সট থেকে currentStoreId এর পাশাপাশি স্টোর ক্রিয়েট করার সময় দেওয়া ফোন নম্বরটি আনা হলো
-  // (আপনার কনটেক্সটের স্ট্রাকচার অনুযায়ী currentStorePhone বা store.phone নাম পরিবর্তন করে নিতে পারেন)
-  const { currentStoreId, currentStorePhone } = useStoreContext(); 
+  // ১. কনটেক্সট থেকে প্রয়োজনীয় ডেটা নেওয়া হলো
+  // (আপনার কনটেক্সট স্ট্রাকচারে ডিরেক্ট currentStorePhone থাকলে তাও আসবে, অথবা currentStore অবজেক্ট থাকলে সেখান থেকেও ফোন নম্বর বের করা যাবে)
+  const { currentStoreId, currentStorePhone, currentStore } = useStoreContext(); 
 
-  // ১. স্টেট ম্যানেজমেন্ট
+  // ২. স্টেট ম্যানেজমেন্ট (শুরুতে ফোন নম্বর একদম খালি রাখা হয়েছে)
   const [selectedIntervals, setSelectedIntervals] = useState<number[]>([30, 7, 3]);
   const [fullPhoneNumber, setFullPhoneNumber] = useState<string>(""); 
   const [channels, setChannels] = useState<string[]>(["WhatsApp Alert", "Email Dispatch"]);
 
   const availableIntervals = [60, 45, 30, 15, 7, 5, 3, 1];
 
-  // ২. TanStack Query Hooks কল
+  // ৩. TanStack Query Hooks কল
   const { data: alertRule, isLoading } = useGetAlertRule(currentStoreId || "");
   const saveAlertRuleMutation = useSaveAlertRule(currentStoreId || "");
 
-  // 🔄 ৩. এপিআই ডেটা এবং কনটেক্সটের ফোন নম্বর সিন্ক (Pre-fill) করা
+  // 🔄 ৪. এপিআই ডেটা অথবা স্টোর ক্রিয়েট করার সময় দেওয়া ফোন নম্বর সিন্ক (Pre-fill) লজিক
   useEffect(() => {
+    // যদি ডাটাবেজে আগে থেকেই এই স্টোরের কোনো এলার্ট রুল সেভ করা থাকে
     if (alertRule) {
-      // ক) যদি ডাটাবেজে আগে থেকেই এলার্ট রুল সেভ করা থাকে
       if (alertRule.intervals) setSelectedIntervals(alertRule.intervals);
+      if (alertRule.channels) setChannels(alertRule.channels);
+      
       if (alertRule.whatsappNumber) {
         setFullPhoneNumber(alertRule.whatsappNumber);
-      } else if (currentStorePhone) {
-        // ডাটাবেজে এলার্ট রুলস থাকলেও যদি নম্বর না থাকে, তবে স্টোরের নম্বরটি বসবে
-        setFullPhoneNumber(currentStorePhone);
+        return; 
       }
-      if (alertRule.channels) setChannels(alertRule.channels);
-    } else if (currentStorePhone) {
-      // খ) যদি একদম নতুন স্টোর হয় (ডাটাবেজে কোনো এলার্ট রুলস নেই), 
-      // তখন স্টোর খোলার সময় যে ফোন নম্বর দেওয়া হয়েছিল, সেটা ডিফল্ট হিসেবে বসে যাবে।
-      setFullPhoneNumber(currentStorePhone);
     }
-  }, [alertRule, currentStorePhone]);
 
-  // ৪. ইন্টারভাল সিলেক্ট/ডিসিলেক্ট লজিক
+    // 🎯 যদি এলার্ট রুলসে নম্বর না থাকে, তবে স্টোর ক্রিয়েশনের সময় দেওয়া নম্বরটি বসবে
+    // এখানে ২ স্তরের ব্যাকআপ রাখা হয়েছে যেন আপনার কনটেক্সটের যেকোনো স্ট্রাকচার থেকেই নম্বরটি পেয়ে যায়
+    const fallbackPhone = currentStorePhone || currentStore?.phone || currentStore?.whatsapp || "";
+    
+    if (fallbackPhone) {
+      setFullPhoneNumber(fallbackPhone);
+    } else {
+      setFullPhoneNumber(""); // কোনো নম্বর না পাওয়া গেলে ব্ল্যাঙ্ক থাকবে, আগের হার্ডকোডেড নম্বর দেখাবে না
+    }
+  }, [alertRule, currentStorePhone, currentStore, currentStoreId]);
+
+  // ৫. ইন্টারভাল সিলেক্ট/ডিসিলেক্ট লজিক
   const toggleInterval = (day: number) => {
     if (selectedIntervals.includes(day)) {
       setSelectedIntervals(selectedIntervals.filter((d) => d !== day));
@@ -254,7 +260,7 @@ export default function AlertRules() {
     }
   };
 
-  // ৫. চ্যানেল সিলেক্ট/ডিসিলেক্ট লজিক
+  // ৬. চ্যানেল সিলেক্ট/ডিসিলেক্ট লজিক
   const toggleChannel = (channel: string) => {
     if (channels.includes(channel)) {
       setChannels(channels.filter((c) => c !== channel));
@@ -263,7 +269,7 @@ export default function AlertRules() {
     }
   };
 
-  // 🚀 ৬. হুক ব্যবহার করে ডেটা ব্যাকএন্ডে সাবমিট করা
+  // 🚀 ৭. হুক ব্যবহার করে ডেটা ব্যাকএন্ডে সাবমিট করা
   const handleSaveAlertSettings = () => {
     if (!currentStoreId) {
       alert("Please select a store first.");
